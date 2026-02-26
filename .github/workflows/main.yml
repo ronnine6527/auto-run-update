@@ -1,0 +1,43 @@
+# 工作流名称（自定义，方便识别）
+name: Auto Run PHP API (1 AM CST Daily)
+
+# 触发规则：定时触发 + 手动触发（测试用）
+on:
+  # 定时触发：cron 表达式（UTC 17点 = 北京时间凌晨1点）
+  schedule:
+    - cron: '0 17 * * *'
+  # 手动触发（可选，方便测试配置是否生效）
+  workflow_dispatch:
+
+# 定义要执行的任务
+jobs:
+  # 任务名称（自定义）
+  call-php-api:
+    # 运行环境：选择 Ubuntu 最新版（GitHub 提供的免费环境）
+    runs-on: ubuntu-latest
+    # 任务步骤
+    steps:
+      # 步骤 1：打印开始日志（方便排查时间/状态）
+      - name: Print start info
+        run: |
+          echo "========================"
+          echo "开始执行定时任务：访问PHP接口"
+          echo "当前 UTC 时间：$(date)"
+          echo "对应北京时间：$(date -d '+8 hours')"
+          echo "========================"
+
+      # 步骤 2：核心操作 - 用 curl 访问 PHP 接口
+      - name: Access PHP API
+        run: |
+          # curl 命令说明：
+          # -v：显示详细日志（便于排查问题）
+          # --max-time 30：超时时间30秒（避免卡壳）
+          # -L：自动跟随重定向（若接口有301/302跳转）
+          curl -v -L --max-time 30 "https://service.tradebee.cn/other/updateordernumber.php?key=huafeng123456"
+
+      # 步骤 3：打印结束日志
+      - name: Print finish info
+        run: |
+          echo "========================"
+          echo "定时任务执行完成！"
+          echo "========================"
